@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 Route::post('login', 'UserController@login');
 
 Route::group(['middleware' => 'auth:api'], function () {
-    Route::get('logout', 'UserController@logout');
+    Route::post('logout', 'UserController@logout');
     Route::group(['middleware' => ['role:admin|operator']], function () {
         Route::resource('users', 'UserController');
         Route::get('user', 'UserController@user');

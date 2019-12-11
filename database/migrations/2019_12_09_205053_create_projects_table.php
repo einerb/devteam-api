@@ -19,9 +19,10 @@ class CreateProjectsTable extends Migration
             $table->text('description')->nullable();
             $table->string('url')->nullable();
             $table->date('date_start');
-            $table->date('date_end');
-            $table->unsignedBigInteger('status_id');
+            $table->date('date_end')->nullable();
+            $table->unsignedBigInteger('status_id')->default(1);
             $table->foreign('status_id')->references('id')->on('project_statuses');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

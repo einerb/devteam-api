@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\ProjectStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ProjectStatusController extends Controller
 {
@@ -14,17 +15,17 @@ class ProjectStatusController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        try {
+            $status = ProjectStatus::all();
+            $response = [
+                'success' => true,
+                'data' => $status,
+                'message' => 'Successful status listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -35,41 +36,34 @@ class ProjectStatusController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $validator  =   Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+                'description' => 'string',
+            ]
+        );
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\ProjectStatus  $projectStatus
-     * @return \Illuminate\Http\Response
-     */
-    public function show(ProjectStatus $projectStatus)
-    {
-        //
-    }
+        if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\ProjectStatus  $projectStatus
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(ProjectStatus $projectStatus)
-    {
-        //
-    }
+        $status = new ProjectStatus([
+            'name' => $request->name,
+            'description' => $request->description,
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\ProjectStatus  $projectStatus
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, ProjectStatus $projectStatus)
-    {
-        //
+        try {
+            $status->save();
+
+            $response = [
+                'success' => true,
+                'data' => $status,
+                'message' => 'Estado creado exitosamente!'
+            ];
+
+            return response()->json($response, 201);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -78,8 +72,17 @@ class ProjectStatusController extends Controller
      * @param  \App\ProjectStatus  $projectStatus
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProjectStatus $projectStatus)
+    public function destroy($id)
     {
-        //
+        try {
+            $status = ProjectStatus::find($id);
+            if (!$status) return response()->json(['success' => false, 'message' => 'Estado de proyecto no existe!'], 401);
+
+            $status = ProjectStatus::destroy($id);
+
+            return response()->json(['success' => true, 'message' => 'Estado fue eliminado exitosamente!'], 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 }

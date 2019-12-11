@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::group(['middleware' => ['role:admin|publisher']], function () {
         Route::resource('projects', 'ProjectController');
+        Route::resource('status', 'ProjectStatusController');
     });
     Route::group(['middleware' => ['role:admin|operator']], function () {
         Route::resource('clients', 'ClientController');

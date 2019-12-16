@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Project;
+use App\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -58,6 +59,15 @@ class ProjectController extends Controller
         try {
             $project->save();
 
+            // Create History Details
+            $action = 'creado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'project_id' => $project->id,
+            ]);
+            $history->save();
+
             $response = [
                 'success' => true,
                 'data' => $project,
@@ -111,8 +121,16 @@ class ProjectController extends Controller
             $project->url = $request->url;
             $project->date_start = $request->date_start;
             $project->date_end = $request->date_end;
-            $project->status_id = $request->status_id;
             $project->save();
+
+            // Create History Details
+            $action = 'actualizado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'project_id' => $id,
+            ]);
+            $history->save();
 
             $response = [
                 'success' => true,
@@ -139,6 +157,15 @@ class ProjectController extends Controller
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
             $project = Project::destroy($id);
+
+            // Create History Details
+            $action = 'eliminado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'project_id' => $id,
+            ]);
+            $history->save();
 
             return response()->json(['success' => true, 'message' => 'El proyecto fue eliminado exitosamente!'], 200);
         } catch (Exception $e) {

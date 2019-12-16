@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\User;
+use App\History;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -83,6 +84,15 @@ class UserController extends Controller
             }
 
             $user->save();
+
+            // Create History Details
+            $action = 'creado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $user->id,
+            ]);
+            $history->save();
 
             $response = [
                 'success' => true,
@@ -166,6 +176,15 @@ class UserController extends Controller
             $user->photo = $request->photo;
             $user->save();
 
+            // Create History Details
+            $action = 'actualizado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $id,
+            ]);
+            $history->save();
+
             $response = [
                 'success' => true,
                 'data' => $user,
@@ -187,10 +206,19 @@ class UserController extends Controller
             $user->status = $request->status;
             $user->save();
 
+            // Create History Details
+            $action = 'activado/inactivado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $id,
+            ]);
+            $history->save();
+
             $response = [
                 'success' => true,
                 'data' => $user,
-                'message' => 'El estado del usuario cambió a'
+                'message' => 'El estado del usuario cambió'
             ];
             return response()->json($response, 200);
         } catch (Exception $e) {
@@ -198,13 +226,22 @@ class UserController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
             $user = User::find($id);
             if (!$user) return response()->json(['success' => false, 'message' => 'El usuario no existe!'], 401);
 
             $user = User::destroy($id);
+
+            // Create History Details
+            $action = 'eliminado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $id,
+            ]);
+            $history->save();
 
             return response()->json(['success' => true, 'message' => 'El usuario fue eliminado exitosamente!'], 200);
         } catch (Exception $e) {

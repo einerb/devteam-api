@@ -15,6 +15,5 @@ class Project extends Model
         'url',
         'date_start',
         'date_end',
-        'status_id',
     ];
 }

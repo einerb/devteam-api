@@ -20,10 +20,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['middleware' => ['role:admin|operator']], function () {
         Route::resource('users', 'UserController');
         Route::get('user', 'UserController@user');
+        Route::get('users/projects/{user}', 'UserController@projectsByUser');
         Route::put('users/status/{id}', 'UserController@activateDeactivate');
     });
     Route::group(['middleware' => ['role:admin|publisher']], function () {
         Route::resource('projects', 'ProjectController');
+        Route::get('projects/users/{project}', 'ProjectController@usersByProject');
+        Route::post('projects/users', 'ProjectController@createUserProject');
+        Route::delete('projects/users/{user}', 'ProjectController@deleteUserProject');
         Route::post('pictures', 'ProjectController@uploadPicture');
         Route::resource('labels', 'LabelController');
     });

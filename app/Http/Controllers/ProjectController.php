@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Project;
 use App\History;
 use App\Picture;
+use App\ProjectUser;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +26,23 @@ class ProjectController extends Controller
             $response = [
                 'success' => true,
                 'data' => $projects,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function usersByProject($project)
+    {
+        try {
+            $project = Project::with('user')->where('id', $project)->first();
+            if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $project,
                 'message' => 'Successful projects listing!'
             ];
             return response()->json($response, 200);
@@ -54,7 +73,7 @@ class ProjectController extends Controller
                 if ($tamano >= 1048576) return response()->json(['success' => false, 'message' => 'La imagen supera el máximo permitido. La imagen debe pesar menos de 1MB!'], 401);
                 if ($extension !== "jpg") return response()->json(['success' => false, 'message' => 'Formato de imagen no permitido. Solo imágenes .jpg o .jpeg!'], 401);
 
-                $imageFileName = Carbon::now()->toDateString() . time() .Uuid::generate()->string. '.' . $extension;
+                $imageFileName = Carbon::now()->toDateString() . time() . Uuid::generate()->string . '.' . $extension;
                 $s3 = \Storage::disk('s3');
                 $filePath = '/images/' . $project->name . '/' . $imageFileName;
                 $s3->put($filePath, file_get_contents($image), 'public');
@@ -121,6 +140,54 @@ class ProjectController extends Controller
                 'success' => true,
                 'data' => $project,
                 'message' => 'Proyecto creado exitosamente!'
+            ];
+
+            return response()->json($response, 201);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function createUserProject(Request $request)
+    {
+        $validator  =   Validator::make(
+            $request->all(),
+            [
+                'project_id' => 'required|integer',
+                'user_id' => 'required|integer',
+                'position' => 'string',
+            ]
+        );
+
+        if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if (!Project::where('id',  $request->project_id)->first()) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+        if (!User::where('id',  $request->user_id)->first()) return response()->json(['success' => false, 'message' => 'El usuario no existe!'], 401);
+        if (ProjectUser::where('user_id',  $request->user_id)->first()) return response()->json(['success' => false, 'message' => 'El usuario ya se encuentra dentro del proyecto!'], 401);
+
+
+        $project = new ProjectUser([
+            'project_id' => $request->project_id,
+            'user_id' => $request->user_id,
+            'position' => $request->position
+        ]);
+
+        try {
+            $project->save();
+
+            // Create History Details
+            $action = 'creado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $request->user_id,
+                'project_id' => $request->project_id
+            ]);
+            $history->save();
+
+            $response = [
+                'success' => true,
+                'data' => $project,
+                'message' => 'Usuario agregado al proyecto exitosamente!'
             ];
 
             return response()->json($response, 201);
@@ -217,6 +284,30 @@ class ProjectController extends Controller
             $history->save();
 
             return response()->json(['success' => true, 'message' => 'El proyecto fue eliminado exitosamente!'], 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteUserProject(Request $request, $user)
+    {
+        try {
+            $userFind = ProjectUser::where('user_id',  $user)->first();
+            if (!$userFind) return response()->json(['success' => false, 'message' => 'El usuario no se encuentra dentro de este proyecto'], 401);
+
+            ProjectUser::destroy($userFind->id);
+
+            // Create History Details
+            $action = 'eliminado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'user_id_receiver' => $userFind->user_id,
+                'project_id' => $userFind->project_id
+            ]);
+            $history->save();
+
+            return response()->json(['success' => true, 'message' => "El usuario fue eliminado del proyecto exitosamente!"], 200);
         } catch (Exception $e) {
             return response()->json('message: ' . $e->getMessage(), 500);
         }

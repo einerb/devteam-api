@@ -26,6 +26,23 @@ class UserController extends Controller
         }
     }
 
+    public function projectsByUser($user)
+    {
+        try {
+            $user = User::with('project')->where('id', $user)->first();
+            if (!$user) return response()->json(['success' => false, 'message' => 'El usuario no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $user,
+                'message' => 'Successful users listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function show($id)
     {
         try {

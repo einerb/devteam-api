@@ -8,6 +8,7 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Project;
 
 class User extends Authenticatable
 {
@@ -50,4 +51,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function project()
+    {
+        return $this->belongsToMany(Project::class, 'project_users')->withPivot('project_id', 'user_id', 'position');
+    }
 }

@@ -21,4 +21,9 @@ class Project extends Model
     public function picture() {
         return $this->hasMany(Picture::class, 'project_id', 'id');
     }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, 'project_users')->withPivot('project_id', 'user_id', 'position');
+    }
 }

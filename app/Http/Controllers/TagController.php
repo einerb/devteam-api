@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Tag;
+use App\ProjectTag;
+use App\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,11 +18,11 @@ class TagController extends Controller
     public function index()
     {
         try {
-            $labels = Tag::all();
+            $tags = Tag::all();
             $response = [
                 'success' => true,
-                'data' => $labels,
-                'message' => 'Successful labels listing!'
+                'data' => $tags,
+                'message' => 'Successful tags listing!'
             ];
             return response()->json($response, 200);
         } catch (Exception $e) {
@@ -39,7 +41,7 @@ class TagController extends Controller
         $validator  =   Validator::make(
             $request->all(),
             [
-                'name' => 'required|unique:labels',
+                'name' => 'required|unique:tags',
                 'description' => 'string',
                 'color' => 'string',
                 'icon' => 'string',
@@ -48,7 +50,7 @@ class TagController extends Controller
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
 
-        $label = new Tag([
+        $tag = new Tag([
             'name' => $request->name,
             'description' => $request->description,
             'color' => $request->color,
@@ -56,12 +58,47 @@ class TagController extends Controller
         ]);
 
         try {
-            $label->save();
+            $tag->save();
 
             $response = [
                 'success' => true,
-                'data' => $label,
+                'data' => $tag,
                 'message' => 'Etiqueta creada exitosamente!'
+            ];
+
+            return response()->json($response, 201);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function addTagProject(Request $request)
+    {
+        $validator  =   Validator::make(
+            $request->all(),
+            [
+                'project_id' => 'required|integer',
+                'tag_id' => 'required|integer',
+            ]
+        );
+
+        if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if (!Project::where('id',  $request->project_id)->first()) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+        if (!Tag::where('id',  $request->tag_id)->first()) return response()->json(['success' => false, 'message' => 'La etiqueta no existe!'], 401);
+        if (ProjectTag::where('tag_id',  $request->tag_id)->first()) return response()->json(['success' => false, 'message' => 'La etiqueta ya se encuentra agregada a este proyecto!'], 401);
+
+        $tag = new ProjectTag([
+            'project_id' => $request->project_id,
+            'tag_id' => $request->tag_id
+        ]);
+
+        try {
+            $tag->save();
+
+            $response = [
+                'success' => true,
+                'data' => $tag,
+                'message' => 'Etiqueta agregada al proyecto exitosamente!'
             ];
 
             return response()->json($response, 201);
@@ -74,16 +111,16 @@ class TagController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Label  $label
+     * @param  \App\tag  $tag
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         try {
-            $label = Tag::find($id);
-            if (!$label) return response()->json(['success' => false, 'message' => 'La etiqueta no existe!'], 401);
+            $tag = Tag::find($id);
+            if (!$tag) return response()->json(['success' => false, 'message' => 'La etiqueta no existe!'], 401);
 
-            $label = Tag::destroy($id);
+            $tag = Tag::destroy($id);
 
             return response()->json(['success' => true, 'message' => 'La etiqueta fue eliminada exitosamente!'], 200);
         } catch (Exception $e) {

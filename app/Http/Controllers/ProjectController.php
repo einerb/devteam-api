@@ -51,6 +51,23 @@ class ProjectController extends Controller
         }
     }
 
+    public function tagsByProject($project)
+    {
+        try {
+            $project = Project::with('tag')->where('id', $project)->first();
+            if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $project,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function uploadPicture(Request $request)
     {
         try {
@@ -163,7 +180,6 @@ class ProjectController extends Controller
         if (!Project::where('id',  $request->project_id)->first()) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
         if (!User::where('id',  $request->user_id)->first()) return response()->json(['success' => false, 'message' => 'El usuario no existe!'], 401);
         if (ProjectUser::where('user_id',  $request->user_id)->first()) return response()->json(['success' => false, 'message' => 'El usuario ya se encuentra dentro del proyecto!'], 401);
-
 
         $project = new ProjectUser([
             'project_id' => $request->project_id,

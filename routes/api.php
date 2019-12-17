@@ -26,9 +26,11 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::group(['middleware' => ['role:admin|publisher']], function () {
         Route::resource('projects', 'ProjectController');
         Route::get('projects/users/{project}', 'ProjectController@usersByProject');
+        Route::get('projects/tags/{project}', 'ProjectController@tagsByProject');
         Route::post('projects/users', 'ProjectController@createUserProject');
         Route::delete('projects/users/{user}', 'ProjectController@deleteUserProject');
         Route::post('pictures', 'ProjectController@uploadPicture');
+        Route::post('tags/project', 'TagController@addTagProject');
         Route::resource('tags', 'TagController');
     });
     Route::group(['middleware' => ['role:admin|operator']], function () {

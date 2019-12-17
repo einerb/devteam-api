@@ -26,4 +26,9 @@ class Project extends Model
     {
         return $this->belongsToMany(User::class, 'project_users')->withPivot('project_id', 'user_id', 'position');
     }
+
+    public function tag()
+    {
+        return $this->belongsToMany(Tag::class, 'project_tags')->withPivot('project_id', 'tag_id');
+    }
 }

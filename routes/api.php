@@ -24,6 +24,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     });
     Route::group(['middleware' => ['role:admin|publisher']], function () {
         Route::resource('projects', 'ProjectController');
+        Route::post('pictures', 'ProjectController@uploadPicture');
     });
     Route::group(['middleware' => ['role:admin|operator']], function () {
         Route::resource('clients', 'ClientController');

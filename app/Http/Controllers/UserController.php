@@ -49,10 +49,10 @@ class UserController extends Controller
             $request->all(),
             [
                 'identification' => 'required|integer',
-                'name' => 'required|min:3',
-                'lastname' => 'required|min:3',
+                'name' => 'required',
+                'lastname' => 'required',
                 'email' => 'required|email',
-                'password' => 'required|alpha_num|min:5',
+                'password' => 'required|alpha_num',
                 'phone' => 'required',
             ]
         );

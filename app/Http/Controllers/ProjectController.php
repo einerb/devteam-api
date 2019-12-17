@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Project;
 use App\History;
+use App\Picture;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Uuid;
 
 class ProjectController extends Controller
 {
@@ -17,13 +20,59 @@ class ProjectController extends Controller
     public function index()
     {
         try {
-            $projects = Project::all();
+            $projects = Project::with('picture')->get();
             $response = [
                 'success' => true,
                 'data' => $projects,
                 'message' => 'Successful projects listing!'
             ];
             return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function uploadPicture(Request $request)
+    {
+        try {
+            $project = Project::where('id', $request->project_id)->first();
+            if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+
+            $validator  =   Validator::make(
+                $request->all(),
+                [
+                    'url_picture' => 'required',
+                ]
+            );
+            if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+
+            $image = $request->file('url_picture');
+            if ($image->isValid()) {
+                $tamano = $image->getSize();
+                $extension = $image->getClientOriginalExtension();
+
+                if ($tamano >= 1048576) return response()->json(['success' => false, 'message' => 'La imagen supera el máximo permitido. La imagen debe pesar menos de 1MB!'], 401);
+                if ($extension !== "jpg") return response()->json(['success' => false, 'message' => 'Formato de imagen no permitido. Solo imágenes .jpg o .jpeg!'], 401);
+
+                $imageFileName = Carbon::now()->toDateString() . time() .Uuid::generate()->string. '.' . $extension;
+                $s3 = \Storage::disk('s3');
+                $filePath = '/images/' . $project->name . '/' . $imageFileName;
+                $s3->put($filePath, file_get_contents($image), 'public');
+
+                $picture = new Picture([
+                    'url_picture' => 'https://devteam-resources.s3.us-east-1.amazonaws.com' . $filePath,
+                    'project_id' => $request->project_id,
+                ]);
+                $picture->save();
+
+                $response = [
+                    'success' => true,
+                    'message' => 'Image saved successfully!'
+                ];
+                return response()->json($response, 200);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Imagen inválida'], 401);
+            }
         } catch (Exception $e) {
             return response()->json('message: ' . $e->getMessage(), 500);
         }

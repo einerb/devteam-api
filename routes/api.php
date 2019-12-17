@@ -29,7 +29,7 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('projects/users', 'ProjectController@createUserProject');
         Route::delete('projects/users/{user}', 'ProjectController@deleteUserProject');
         Route::post('pictures', 'ProjectController@uploadPicture');
-        Route::resource('labels', 'LabelController');
+        Route::resource('tags', 'TagController');
     });
     Route::group(['middleware' => ['role:admin|operator']], function () {
         Route::resource('clients', 'ClientController');

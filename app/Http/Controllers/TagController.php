@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Label;
+use App\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class LabelController extends Controller
+class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +16,7 @@ class LabelController extends Controller
     public function index()
     {
         try {
-            $labels = Label::all();
+            $labels = Tag::all();
             $response = [
                 'success' => true,
                 'data' => $labels,
@@ -48,7 +48,7 @@ class LabelController extends Controller
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
 
-        $label = new Label([
+        $label = new Tag([
             'name' => $request->name,
             'description' => $request->description,
             'color' => $request->color,
@@ -80,10 +80,10 @@ class LabelController extends Controller
     public function destroy($id)
     {
         try {
-            $label = Label::find($id);
+            $label = Tag::find($id);
             if (!$label) return response()->json(['success' => false, 'message' => 'La etiqueta no existe!'], 401);
 
-            $label = Label::destroy($id);
+            $label = Tag::destroy($id);
 
             return response()->json(['success' => true, 'message' => 'La etiqueta fue eliminada exitosamente!'], 200);
         } catch (Exception $e) {

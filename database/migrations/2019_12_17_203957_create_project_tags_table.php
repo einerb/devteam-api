@@ -16,9 +16,9 @@ class CreateProjectTagsTable extends Migration
         Schema::create('project_tags', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('label_id');
+            $table->unsignedBigInteger('tag_id');
             $table->foreign('project_id')->references('id')->on('projects');
-            $table->foreign('label_id')->references('id')->on('labels');
+            $table->foreign('tag_id')->references('id')->on('tags');
             $table->timestamps();
         });
     }

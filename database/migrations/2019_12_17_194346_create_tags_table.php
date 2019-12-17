@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLabelsTable extends Migration
+class CreateTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateLabelsTable extends Migration
      */
     public function up()
     {
-        Schema::create('labels', function (Blueprint $table) {
+        Schema::create('tags', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -30,6 +30,6 @@ class CreateLabelsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('labels');
+        Schema::dropIfExists('tags');
     }
 }

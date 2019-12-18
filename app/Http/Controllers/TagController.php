@@ -41,7 +41,7 @@ class TagController extends Controller
         $validator  =   Validator::make(
             $request->all(),
             [
-                'name' => 'required|unique:tags',
+                'name' => 'required',
                 'description' => 'string',
                 'color' => 'string',
                 'icon' => 'string',
@@ -49,6 +49,7 @@ class TagController extends Controller
         );
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if(Tag::where('name',  $request->name)->first()) return response()->json(['success' => false, 'message' => 'El nombre de la etiqueta ya existe!'], 401);
 
         $tag = new Tag([
             'name' => $request->name,

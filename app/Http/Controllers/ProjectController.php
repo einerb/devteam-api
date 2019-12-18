@@ -209,7 +209,7 @@ class ProjectController extends Controller
     public function show($id)
     {
         try {
-            $project = Project::where('id', $id)->first();
+            $project = Project::with('picture', 'tag', 'client','user')->where('id', $id)->first();
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
             $response = [

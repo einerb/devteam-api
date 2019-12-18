@@ -49,6 +49,7 @@ class ClientController extends Controller
         );
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if (Client::where('email',  $request->email)->first()) return response()->json(['success' => false, 'message' => 'El correo ya existe!'], 401);
 
         $clients = new Client([
             'name' => $request->name,

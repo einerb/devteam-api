@@ -75,6 +75,8 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if(User::where('identification',  $request->identification)->first()) return response()->json(['success' => false, 'message' => 'La identificación ya existe!'], 401);
+        if(User::where('email',  $request->email)->first()) return response()->json(['success' => false, 'message' => 'El correo ya existe!'], 401);
 
         $user = new User([
             'identification' => $request->identification,

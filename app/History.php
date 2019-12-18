@@ -29,7 +29,7 @@ class History extends Model
         return $this->belongsTo(User::class, 'user_id_receiver', 'id');
     }
 
-    public function clients()
+    public function client()
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
     }

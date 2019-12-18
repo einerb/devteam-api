@@ -15,7 +15,7 @@ class HistoryController extends Controller
     public function index()
     {
         try {
-            $history = History::with('userEmitter', 'userReceiver', 'project', 'client_id')->get();
+            $history = History::with('userEmitter', 'userReceiver', 'project', 'client')->get();
             $response = [
                 'success' => true,
                 'data' => $history,

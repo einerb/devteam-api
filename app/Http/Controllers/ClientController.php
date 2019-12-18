@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Client;
+use App\History;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -63,7 +64,7 @@ class ClientController extends Controller
             $response = [
                 'success' => true,
                 'data' => $clients,
-                'message' => 'Proyecto creado exitosamente!'
+                'message' => 'Cliente creado exitosamente!'
             ];
 
             return response()->json($response, 201);
@@ -78,9 +79,21 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function show($client)
+    public function show($id)
     {
-        //
+        try {
+            $client = Client::where('id', $id)->first();
+            if (!$client) return response()->json(['success' => false, 'message' => 'El cliente no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $client,
+                'message' => 'Successful clients listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -90,19 +103,62 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $client)
+    public function update(Request $request, $id)
     {
-        //
+        try {
+            $client = Client::find($id);
+            if (!$client) return response()->json(['success' => false, 'message' => 'El cliente no existe!'], 401);
+
+            $client->name = $request->name;
+            $client->lastname = $request->lastname;
+            $client->email = $request->email;
+            $client->phone = $request->phone;
+            $client->address = $request->address;
+            $client->status = $request->status;
+
+            $client->save();
+
+            // Create History Details
+            $action = 'actualizado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'client_id' => $id,
+            ]);
+            $history->save();
+
+            $response = [
+                'success' => true,
+                'data' => $client,
+                'message' => 'Successfully updated client!'
+            ];
+
+            return response()->json($response, 201);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Client $client)
+    public function destroy(Request $request, $id)
     {
-        //
+        try {
+            $client = Client::find($id);
+            if (!$client) return response()->json(['success' => false, 'message' => 'El cliente no existe!'], 401);
+
+            $client = Client::destroy($client);
+
+            // Create History Details
+            $action = 'eliminado';
+            $history = new History([
+                'user_id_emitter' => $request->user()->id,
+                'action' => $action,
+                'client_id' => $id,
+            ]);
+            $history->save();
+
+            return response()->json(['success' => true, 'message' => 'El cliente fue eliminado exitosamente!'], 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
     }
 }

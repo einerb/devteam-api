@@ -137,6 +137,7 @@ class ProjectController extends Controller
                 'user_id_emitter' => $request->user()->id,
                 'action' => $action,
                 'project_id' => $project->id,
+                'client_id'=> $project->client_id
             ]);
             $history->save();
 

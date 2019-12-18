@@ -21,6 +21,7 @@ class CreateClientsTable extends Migration
             $table->string('phone');
             $table->string('address')->nullable();
             $table->boolean('status')->default(true);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

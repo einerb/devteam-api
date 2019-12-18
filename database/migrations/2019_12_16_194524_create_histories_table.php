@@ -19,9 +19,11 @@ class CreateHistoriesTable extends Migration
             $table->string('action');
             $table->unsignedBigInteger('project_id')->nullable();
             $table->unsignedBigInteger('user_id_receiver')->nullable();
+            $table->unsignedBigInteger('client_id')->nullable();
             $table->foreign('user_id_emitter')->references('id')->on('users');
             $table->foreign('project_id')->references('id')->on('projects');
             $table->foreign('user_id_receiver')->references('id')->on('users');
+            $table->foreign('client_id')->references('id')->on('clients');
             $table->timestamps();
         });
     }

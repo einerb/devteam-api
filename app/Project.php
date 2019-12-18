@@ -4,7 +4,6 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Picture;
 
 class Project extends Model
 {
@@ -16,9 +15,11 @@ class Project extends Model
         'url',
         'date_start',
         'date_end',
+        'client_id',
     ];
 
-    public function picture() {
+    public function picture()
+    {
         return $this->hasMany(Picture::class, 'project_id', 'id');
     }
 
@@ -30,5 +31,10 @@ class Project extends Model
     public function tag()
     {
         return $this->belongsToMany(Tag::class, 'project_tags')->withPivot('project_id', 'tag_id');
+    }
+
+    public function client()
+    {
+        return $this->hasOne(Client::class, 'id',  'client_id');
     }
 }

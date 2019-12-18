@@ -22,19 +22,16 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::get('user', 'UserController@user');
         Route::get('users/projects/{user}', 'UserController@projectsByUser');
         Route::put('users/status/{id}', 'UserController@activateDeactivate');
+        Route::resource('clients', 'ClientController');
     });
     Route::group(['middleware' => ['role:admin|publisher']], function () {
         Route::resource('projects', 'ProjectController');
         Route::get('projects/users/{project}', 'ProjectController@usersByProject');
-        Route::get('projects/tags/{project}', 'ProjectController@tagsByProject');
         Route::post('projects/users', 'ProjectController@createUserProject');
         Route::delete('projects/users/{user}', 'ProjectController@deleteUserProject');
         Route::post('pictures', 'ProjectController@uploadPicture');
         Route::post('tags/project', 'TagController@addTagProject');
         Route::resource('tags', 'TagController');
-    });
-    Route::group(['middleware' => ['role:admin|operator']], function () {
-        Route::resource('clients', 'ClientController');
     });
     Route::group(['middleware' => ['role:admin']], function () {
         Route::resource('admin', 'AdminController');

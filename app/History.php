@@ -3,8 +3,6 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
-use App\Project;
 
 class History extends Model
 {
@@ -13,6 +11,7 @@ class History extends Model
         'action',
         'project_id',
         'user_id_receiver',
+        'client_id',
     ];
 
     public function userEmitter()
@@ -28,5 +27,10 @@ class History extends Model
     public function userReceiver()
     {
         return $this->belongsTo(User::class, 'user_id_receiver', 'id');
+    }
+
+    public function clients()
+    {
+        return $this->belongsTo(Client::class, 'client_id', 'id');
     }
 }

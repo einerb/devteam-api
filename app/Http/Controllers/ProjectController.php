@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Client;
 use App\Project;
 use App\History;
 use App\Picture;
@@ -22,7 +23,7 @@ class ProjectController extends Controller
     public function index()
     {
         try {
-            $projects = Project::with('picture')->get();
+            $projects = Project::with('picture', 'tag', 'client','user')->get();
             $response = [
                 'success' => true,
                 'data' => $projects,
@@ -38,23 +39,6 @@ class ProjectController extends Controller
     {
         try {
             $project = Project::with('user')->where('id', $project)->first();
-            if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
-
-            $response = [
-                'success' => true,
-                'data' => $project,
-                'message' => 'Successful projects listing!'
-            ];
-            return response()->json($response, 200);
-        } catch (Exception $e) {
-            return response()->json('message: ' . $e->getMessage(), 500);
-        }
-    }
-
-    public function tagsByProject($project)
-    {
-        try {
-            $project = Project::with('tag')->where('id', $project)->first();
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
             $response = [
@@ -129,16 +113,19 @@ class ProjectController extends Controller
                 'description' => 'string',
                 'url' => 'string',
                 'date_start' => 'string',
+                'client_id'=> 'integer|required',
             ]
         );
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
+        if (!Client::where('id', $request->client_id)->first()) return response()->json(['success' => false, 'message' => 'El cliente no existe!'], 401);
 
         $project = new Project([
             'name' => $request->name,
             'description' => $request->description,
             'url' => $request->url,
             'date_start' => $request->date_start,
+            'client_id' => $request->client_id,
         ]);
 
         try {

@@ -38,7 +38,6 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::post('roles', 'AdminController@createRole');
         Route::get('permissions', 'AdminController@permissions');
         Route::post('permissions', 'AdminController@createPermission');
-        Route::post('assign/permissions', 'AdminController@assignpermission');
         Route::resource('history', 'HistoryController');
     });
 });

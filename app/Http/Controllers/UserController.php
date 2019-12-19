@@ -103,6 +103,7 @@ class UserController extends Controller
             }
 
             $user->save();
+            $user->syncRoles($request->role_id, []);
 
             // Create History Details
             $action = 'creado';

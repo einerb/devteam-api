@@ -34,7 +34,11 @@ Route::group(['middleware' => 'auth:api'], function () {
         Route::resource('tags', 'TagController');
     });
     Route::group(['middleware' => ['role:admin']], function () {
-        Route::resource('admin', 'AdminController');
+        Route::get('roles', 'AdminController@roles');
+        Route::post('roles', 'AdminController@createRole');
+        Route::get('permissions', 'AdminController@permissions');
+        Route::post('permissions', 'AdminController@createPermission');
+        Route::post('assign/permissions', 'AdminController@assignpermission');
         Route::resource('history', 'HistoryController');
     });
 });

@@ -26,6 +26,21 @@ class UserController extends Controller
         }
     }
 
+    public function indexPublic()
+    {
+        try {
+            $users = User::select('photo', 'name', 'lastname', 'position', 'description', 'slack_url', 'linkedin_url', 'facebook_url', 'twitter_url', 'github_url', 'instagram_url')->get();
+            $response = [
+                'success' => true,
+                'data' => $users,
+                'message' => 'Successful users listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
     public function projectsByUser($user)
     {
         try {
@@ -71,12 +86,13 @@ class UserController extends Controller
                 'email' => 'required|email',
                 'password' => 'required|alpha_num',
                 'phone' => 'required',
+                'is_employed' => 'required',
             ]
         );
 
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
-        if(User::where('identification',  $request->identification)->first()) return response()->json(['success' => false, 'message' => 'La identificación ya existe!'], 401);
-        if(User::where('email',  $request->email)->first()) return response()->json(['success' => false, 'message' => 'El correo ya existe!'], 401);
+        if (User::where('identification',  $request->identification)->first()) return response()->json(['success' => false, 'message' => 'La identificación ya existe!'], 401);
+        if (User::where('email',  $request->email)->first()) return response()->json(['success' => false, 'message' => 'El correo ya existe!'], 401);
 
         $user = new User([
             'identification' => $request->identification,
@@ -86,10 +102,18 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
             'address' => $request->address,
             'phone' => $request->phone,
+            'is_employed' => $request->is_employed,
+            'position' => $request->position,
             'birthdate' => $request->birthdate,
             'date_start' => $request->date_start,
             'photo' => $request->photo,
-            'online' => $request->online,
+            'description' => $request->description,
+            'slack_url' => $request->slack_url,
+            'linkedin_url' => $request->linkedin_url,
+            'facebook_url' => $request->facebook_url,
+            'twitter_url' => $request->twitter_url,
+            'github_url' => $request->github_url,
+            'instagram_url' => $request->instagram_url,
         ]);
 
         try {
@@ -150,6 +174,7 @@ class UserController extends Controller
                 $token->expires_at = Carbon::now()->addWeeks(1);
             }
 
+            $user->online = true;
             $token->save();
             return response()->json([
                 'access_token' => $tokenResult->accessToken,
@@ -167,6 +192,7 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
+        $request->user()->online = true;
         $request->user()->token()->revoke();
         return response()->json([
             'success' => false,
@@ -185,7 +211,6 @@ class UserController extends Controller
             $user = User::find($id);
             if (!$user) return response()->json(['success' => false, 'message' => 'El usuario no existe!'], 401);
 
-            $user->identification = $request->identification;
             $user->name = $request->name;
             $user->lastname = $request->lastname;
             $user->password = bcrypt($request->password);
@@ -194,6 +219,15 @@ class UserController extends Controller
             $user->birthdate = $request->birthdate;
             $user->date_start = $request->date_start;
             $user->photo = $request->photo;
+            $user->is_employed = $request->is_employed;
+            $user->position = $request->position;
+            $user->description = $request->description;
+            $user->slack_url = $request->slack_url;
+            $user->linkedin_url = $request->linkedin_url;
+            $user->facebook_url = $request->facebook_url;
+            $user->twitter_url = $request->twitter_url;
+            $user->github_url = $request->github_url;
+            $user->instagram_url = $request->instagram_url;
             $user->save();
 
             // Create History Details

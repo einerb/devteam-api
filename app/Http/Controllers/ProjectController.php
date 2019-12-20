@@ -23,7 +23,22 @@ class ProjectController extends Controller
     public function index()
     {
         try {
-            $projects = Project::with('picture', 'tag', 'client','user')->get();
+            $projects = Project::with('picture', 'tag', 'client', 'user')->get();
+            $response = [
+                'success' => true,
+                'data' => $projects,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function indexPublic()
+    {
+        try {
+            $projects = Project::with('picture', 'tag', 'client')->get();
             $response = [
                 'success' => true,
                 'data' => $projects,
@@ -113,7 +128,7 @@ class ProjectController extends Controller
                 'description' => 'string',
                 'url' => 'string',
                 'date_start' => 'string',
-                'client_id'=> 'integer|required',
+                'client_id' => 'integer|required',
             ]
         );
 
@@ -137,7 +152,7 @@ class ProjectController extends Controller
                 'user_id_emitter' => $request->user()->id,
                 'action' => $action,
                 'project_id' => $project->id,
-                'client_id'=> $project->client_id
+                'client_id' => $project->client_id
             ]);
             $history->save();
 
@@ -209,7 +224,24 @@ class ProjectController extends Controller
     public function show($id)
     {
         try {
-            $project = Project::with('picture', 'tag', 'client','user')->where('id', $id)->first();
+            $project = Project::with('picture', 'tag', 'client', 'user')->where('id', $id)->first();
+            if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $project,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function getPublic($id)
+    {
+        try {
+            $project = Project::with('picture', 'tag', 'client')->where('id', $id)->first();
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
             $response = [

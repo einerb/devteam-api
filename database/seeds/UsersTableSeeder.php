@@ -18,7 +18,9 @@ class UsersTableSeeder extends Seeder
             'lastname' => 'Bravo Cárdenas',
             'email' => 'einer.bravo@devteam.com.co',
             'password' => bcrypt('neutro123*devteam'),
-            'phone' => '3232904614'
+            'phone' => '3232904614',
+            'is_employed' => true,
+            'position' => 'CEO & Founder'
         ]);
 
         $user->assignRole('admin');

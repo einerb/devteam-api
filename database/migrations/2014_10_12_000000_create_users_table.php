@@ -36,7 +36,7 @@ class CreateUsersTable extends Migration
             $table->string('github_url')->nullable();
             $table->string('instagram_url')->nullable();
             $table->boolean('status')->default(true);
-            $table->boolean('online')->nullable();
+            $table->boolean('online')->nullable()->default(false);
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

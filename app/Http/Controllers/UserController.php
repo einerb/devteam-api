@@ -75,6 +75,8 @@ class UserController extends Controller
         }
     }
 
+
+
     public function store(Request $request)
     {
         $validator  =   Validator::make(
@@ -175,6 +177,7 @@ class UserController extends Controller
             }
 
             $user->online = true;
+            $user->save();
             $token->save();
             return response()->json([
                 'access_token' => $tokenResult->accessToken,
@@ -192,8 +195,12 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
-        $request->user()->online = true;
-        $request->user()->token()->revoke();
+        $user = $request->user();
+
+        $user->token()->revoke();
+        $user->online = false;
+        $user->save();
+
         return response()->json([
             'success' => false,
             'message' => 'Se ha desconectado con éxito!'

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Uuid;
 
 class UserController extends Controller
 {
@@ -75,8 +76,6 @@ class UserController extends Controller
         }
     }
 
-
-
     public function store(Request $request)
     {
         $validator  =   Validator::make(
@@ -96,6 +95,23 @@ class UserController extends Controller
         if (User::where('identification',  $request->identification)->first()) return response()->json(['success' => false, 'message' => 'La identificación ya existe!'], 401);
         if (User::where('email',  $request->email)->first()) return response()->json(['success' => false, 'message' => 'El correo ya existe!'], 401);
 
+        $image = $request->file('photo');
+        if ($image->isValid()) {
+            $tamano = $image->getSize();
+            $extension = $image->getClientOriginalExtension();
+
+            if ($tamano >= 500000) return response()->json(['success' => false, 'message' => 'La imagen supera el máximo permitido. La imagen debe pesar menos de 500KB!'], 401);
+            if ($extension !== "jpg") return response()->json(['success' => false, 'message' => 'Formato de imagen no permitido. Solo imágenes .jpg o .jpeg!'], 401);
+
+            $imageFileName = Carbon::now()->toDateString() . time() . Uuid::generate()->string . '.' . $extension;
+            $s3 = \Storage::disk('s3');
+            $filePath = '/images/users/' . $request->identification . '/' . $imageFileName;
+            $s3->put($filePath, file_get_contents($image), 'public');
+            $url = 'https://devteam-resources.s3.us-east-1.amazonaws.com' . $filePath;
+        } else {
+            return response()->json(['success' => false, 'message' => 'Imagen inválida'], 401);
+        }
+
         $user = new User([
             'identification' => $request->identification,
             'name' => $request->name,
@@ -108,7 +124,7 @@ class UserController extends Controller
             'position' => $request->position,
             'birthdate' => $request->birthdate,
             'date_start' => $request->date_start,
-            'photo' => $request->photo,
+            'photo' => $url,
             'description' => $request->description,
             'slack_url' => $request->slack_url,
             'linkedin_url' => $request->linkedin_url,

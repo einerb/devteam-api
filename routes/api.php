@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 Route::post('login', 'UserController@login');
 Route::get('users/public', 'UserController@indexPublic');
 Route::get('projects/public', 'ProjectController@indexPublic');

@@ -91,7 +91,7 @@ class ProjectController extends Controller
 
                 $imageFileName = Carbon::now()->toDateString() . time() . Uuid::generate()->string . '.' . $extension;
                 $s3 = \Storage::disk('s3');
-                $filePath = '/images/' . $project->name . '/' . $imageFileName;
+                $filePath = '/images/projects/' . $project->name . '/' . $imageFileName;
                 $s3->put($filePath, file_get_contents($image), 'public');
 
                 $picture = new Picture([

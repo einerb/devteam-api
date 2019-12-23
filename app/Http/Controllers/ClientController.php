@@ -29,6 +29,21 @@ class ClientController extends Controller
         }
     }
 
+    public function indexPublic()
+    {
+        try {
+            $project = Client::select('name', 'lastname', 'company', 'description')->get();
+            $response = [
+                'success' => true,
+                'data' => $project,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -93,23 +108,6 @@ class ClientController extends Controller
                 'success' => true,
                 'data' => $client,
                 'message' => 'Successful clients listing!'
-            ];
-            return response()->json($response, 200);
-        } catch (Exception $e) {
-            return response()->json('message: ' . $e->getMessage(), 500);
-        }
-    }
-
-    public function getPublic($id)
-    {
-        try {
-            $project = Client::where('id', $id)->select('name', 'lastname', 'company', 'description')->first();
-            if (!$project) return response()->json(['success' => false, 'message' => 'El client no existe!'], 401);
-
-            $response = [
-                'success' => true,
-                'data' => $project,
-                'message' => 'Successful projects listing!'
             ];
             return response()->json($response, 200);
         } catch (Exception $e) {

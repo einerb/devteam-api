@@ -77,6 +77,7 @@ class ProjectController extends Controller
                 $request->all(),
                 [
                     'url_picture' => 'required',
+                    'default' => 'required'
                 ]
             );
             if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
@@ -97,6 +98,7 @@ class ProjectController extends Controller
                 $picture = new Picture([
                     'url_picture' => 'https://devteam-resources.s3.us-east-1.amazonaws.com' . $filePath,
                     'project_id' => $request->project_id,
+                    'default' => $request->default
                 ]);
                 $picture->save();
 
@@ -113,6 +115,14 @@ class ProjectController extends Controller
         }
     }
 
+    public function createLabel($name)
+    {
+        $stringConverted = strtolower($name);
+        $stringFinal = str_replace(" ", "-", $stringConverted);
+
+        return $stringFinal;
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -125,6 +135,7 @@ class ProjectController extends Controller
             $request->all(),
             [
                 'name' => 'required',
+                'label' => 'string',
                 'description' => 'string',
                 'url' => 'string',
                 'date_start' => 'string',
@@ -135,8 +146,11 @@ class ProjectController extends Controller
         if ($validator->fails()) return response()->json(['success' => false, "messages" => $validator->errors()], 400);
         if (!Client::where('id', $request->client_id)->first()) return response()->json(['success' => false, 'message' => 'El cliente no existe!'], 401);
 
+        $label = $this->createLabel($request->name);
+
         $project = new Project([
             'name' => $request->name,
+            'label' => $label,
             'description' => $request->description,
             'url' => $request->url,
             'date_start' => $request->date_start,
@@ -241,7 +255,7 @@ class ProjectController extends Controller
     public function getPublic($id)
     {
         try {
-            $project = Project::with('picture', 'tag', 'client')->where('id', $id)->first();
+            $project = Project::with('picture', 'tag', 'client')->where('label', $id)->first();
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
             $response = [
@@ -268,7 +282,10 @@ class ProjectController extends Controller
             $project = Project::find($id);
             if (!$project) return response()->json(['success' => false, 'message' => 'El proyecto no existe!'], 401);
 
+            $label = $this->createLabel($request->name);
+
             $project->name = $request->name;
+            $project->label = $label;
             $project->description = $request->description;
             $project->url = $request->url;
             $project->date_start = $request->date_start;

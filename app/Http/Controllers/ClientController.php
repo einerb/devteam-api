@@ -42,6 +42,7 @@ class ClientController extends Controller
             [
                 'name' => 'string',
                 'lastname' => 'string',
+                'company' => 'required|string',
                 'email' => 'required|string|email',
                 'phone' => 'string',
                 'address' => 'string',
@@ -54,7 +55,9 @@ class ClientController extends Controller
         $clients = new Client([
             'name' => $request->name,
             'lastname' => $request->lastname,
+            'company' => $request->company,
             'email' => $request->email,
+            'description' => $request->description,
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
@@ -97,6 +100,23 @@ class ClientController extends Controller
         }
     }
 
+    public function getPublic($id)
+    {
+        try {
+            $project = Client::where('id', $id)->select('name', 'lastname', 'company', 'description')->first();
+            if (!$project) return response()->json(['success' => false, 'message' => 'El client no existe!'], 401);
+
+            $response = [
+                'success' => true,
+                'data' => $project,
+                'message' => 'Successful projects listing!'
+            ];
+            return response()->json($response, 200);
+        } catch (Exception $e) {
+            return response()->json('message: ' . $e->getMessage(), 500);
+        }
+    }
+
     /**
      * Update the specified resource in storage.
      *
@@ -112,7 +132,9 @@ class ClientController extends Controller
 
             $client->name = $request->name;
             $client->lastname = $request->lastname;
+            $client->company = $request->company;
             $client->email = $request->email;
+            $client->description = $request->description;
             $client->phone = $request->phone;
             $client->address = $request->address;
             $client->status = $request->status;

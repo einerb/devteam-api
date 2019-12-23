@@ -17,6 +17,7 @@ class CreatePicturesTable extends Migration
             $table->bigIncrements('id');
             $table->longText('url_picture');
             $table->unsignedBigInteger('project_id');
+            $table->boolean('default');
             $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
             $table->timestamps();
         });
